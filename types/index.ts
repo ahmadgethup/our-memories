@@ -1,5 +1,5 @@
 
-export type Tab = "home" | "memories" | "notes" | "plans";
+export type Tab = "home" | "memories" | "notes" | "plans" | "wedding";
 
 export type UserName = "Tara" | "Ahmad";
 

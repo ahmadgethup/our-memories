@@ -4,7 +4,7 @@ import type { Memory, Note, Plan, Tab, UserName } from "../../types";
 import FeatureCard from "../FeatureCard";
 import HeartPulse from "../HeartPulse";
 import StatPill from "../StatPill";
-import { IconMemories, IconNotes, IconPlans, IconExpand } from "../icons";
+import { IconMemories, IconNotes, IconPlans, IconWedding, IconExpand } from "../icons";
 
 type Props = {
   memories: Memory[];
@@ -65,6 +65,14 @@ export default function HomePage({
           desc="Dream together and remember every future date we have planned."
           delay="160"
           onClick={() => setActiveTab("plans")}
+        />
+
+        <FeatureCard
+          icon={<IconWedding size={28} />}
+          title="Our Wedding"
+          desc="Watch the days until our forever, with a little music-box serenade."
+          delay="240"
+          onClick={() => setActiveTab("wedding")}
         />
       </div>
 

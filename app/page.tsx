@@ -7,6 +7,7 @@ import {
   IconMemories,
   IconNotes,
   IconPlans,
+  IconWedding,
   IconLock,
 } from "../components/icons";
 import HeartPulse from "../components/HeartPulse";
@@ -17,6 +18,7 @@ import HomePage from "../components/pages/HomePage";
 import MemoriesPage from "../components/pages/MemoriesPage";
 import NotesPage from "../components/pages/NotesPage";
 import PlansPage from "../components/pages/PlansPage";
+import WeddingPage from "../components/pages/WeddingPage";
 
 export default function Home() {
   const [access, setAccess] = useState(false);
@@ -219,6 +221,7 @@ export default function Home() {
     { id: "memories", icon: <IconMemories />, label: "Memories" },
     { id: "notes", icon: <IconNotes />, label: "Notes" },
     { id: "plans", icon: <IconPlans />, label: "Plans" },
+    { id: "wedding", icon: <IconWedding />, label: "Our Wedding" },
   ];
   return (
     <div className="app-root app-visible">
@@ -324,6 +327,7 @@ export default function Home() {
             deletePlan={deletePlan}
           />
         )}
+        {activeTab === "wedding" && <WeddingPage />}
       </main>
     </div>
   );

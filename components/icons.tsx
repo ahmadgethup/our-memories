@@ -60,6 +60,25 @@ export function IconPlans({ size = 20 }: { size?: number }) {
   );
 }
 
+export function IconWedding({ size = 20 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z" />
+      <path d="M8.5 12h2l1-2 1.5 4 1-2h1.5" />
+    </svg>
+  );
+}
+
 export function IconHome({ size = 20 }: { size?: number }) {
   return (
     <svg
