@@ -1,13 +1,14 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
-import type { Memory, Note, Plan, Tab } from "../types";
+import type { Memory, Note, Plan, Song, SongComment, SongRating, Tab } from "../types";
 import {
   IconHome,
   IconMemories,
   IconNotes,
   IconPlans,
   IconWedding,
+  IconMusic,
   IconLock,
 } from "../components/icons";
 import HeartPulse from "../components/HeartPulse";
@@ -19,6 +20,7 @@ import MemoriesPage from "../components/pages/MemoriesPage";
 import NotesPage from "../components/pages/NotesPage";
 import PlansPage from "../components/pages/PlansPage";
 import WeddingPage from "../components/pages/WeddingPage";
+import MusicPage from "../components/pages/MusicPage";
 
 export default function Home() {
   const [access, setAccess] = useState(false);
@@ -29,6 +31,12 @@ export default function Home() {
   const [memories, setMemories] = useState<Memory[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [songRatings, setSongRatings] = useState<SongRating[]>([]);
+  const [songComments, setSongComments] = useState<SongComment[]>([]);
+  const [commentDraft, setCommentDraft] = useState("");
+  const [feedbackSetupNeeded, setFeedbackSetupNeeded] = useState(false);
+  const [feedbackSaving, setFeedbackSaving] = useState(false);
   const [lightboxMemory, setLightboxMemory] = useState<Memory | null>(null);
 
   const [memoryTitle, setMemoryTitle] = useState("");
@@ -37,10 +45,20 @@ export default function Home() {
   const [noteContent, setNoteContent] = useState("");
   const [planTitle, setPlanTitle] = useState("");
   const [planDate, setPlanDate] = useState("");
+  const [songTitle, setSongTitle] = useState("");
+  const [songSpotifyUrl, setSongSpotifyUrl] = useState("");
+  const [songDedication, setSongDedication] = useState("");
+  const [songProvider, setSongProvider] = useState<"spotify" | "youtube">("spotify");
+  const [songLoading, setSongLoading] = useState(false);
+  const [songSetupNeeded, setSongSetupNeeded] = useState(false);
+  const [youtubeSetupNeeded, setYoutubeSetupNeeded] = useState(false);
+  const [selectedSongId, setSelectedSongId] = useState<string | null>(null);
+  const [songPickedBy, setSongPickedBy] = useState<"Tara" | "Ahmad" | null>(null);
+  const songChannel = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const [loading, setLoading] = useState(false);
 
   const fetchData = async () => {
-    const [{ data: memoriesData }, { data: notesData }, { data: plansData }] =
+    const [memoriesResult, notesResult, plansResult, songsResult, songsSchemaResult, ratingsResult, commentsResult] =
       await Promise.all([
         supabase
           .from("memories")
@@ -54,10 +72,24 @@ export default function Home() {
           .from("plans")
           .select("*")
           .order("created_at", { ascending: false }),
+        supabase
+          .from("songs")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        supabase.from("songs").select("provider,youtube_id").limit(0),
+        supabase.from("song_ratings").select("*").order("updated_at", { ascending: false }),
+        supabase.from("song_comments").select("*").order("created_at", { ascending: false }),
       ]);
-    setMemories(memoriesData || []);
-    setNotes(notesData || []);
-    setPlans(plansData || []);
+    setMemories(memoriesResult.data || []);
+    setNotes(notesResult.data || []);
+    setPlans(plansResult.data || []);
+    setSongs(songsResult.data || []);
+    setSongSetupNeeded(Boolean(songsResult.error));
+    setYoutubeSetupNeeded(Boolean(songsSchemaResult.error));
+    setSongRatings(ratingsResult.data || []);
+    setSongComments(commentsResult.data || []);
+    setFeedbackSetupNeeded(Boolean(ratingsResult.error || commentsResult.error));
+    if (!selectedSongId && songsResult.data?.[0]) setSelectedSongId(songsResult.data[0].id);
   };
 
   // Restore the two-person device session after hydration.
@@ -79,7 +111,7 @@ export default function Home() {
     let cancelled = false;
     const load = async () => {
       try {
-        const [m, n, p] = await Promise.all([
+        const [m, n, p, s, songSchema, ratings, comments] = await Promise.all([
           supabase
             .from("memories")
             .select("*")
@@ -92,6 +124,13 @@ export default function Home() {
             .from("plans")
             .select("*")
             .order("created_at", { ascending: false }),
+          supabase
+            .from("songs")
+            .select("*")
+            .order("created_at", { ascending: false }),
+          supabase.from("songs").select("provider,youtube_id").limit(0),
+          supabase.from("song_ratings").select("*").order("updated_at", { ascending: false }),
+          supabase.from("song_comments").select("*").order("created_at", { ascending: false }),
         ]);
         if (cancelled) return;
         if (m.error || n.error || p.error) {
@@ -100,6 +139,13 @@ export default function Home() {
         setMemories(m.data ?? []);
         setNotes(n.data ?? []);
         setPlans(p.data ?? []);
+        setSongs(s.data ?? []);
+        setSongSetupNeeded(Boolean(s.error));
+        setYoutubeSetupNeeded(Boolean(songSchema.error));
+        setSongRatings(ratings.data ?? []);
+        setSongComments(comments.data ?? []);
+        setFeedbackSetupNeeded(Boolean(ratings.error || comments.error));
+        setSelectedSongId((current) => current ?? s.data?.[0]?.id ?? null);
       } catch (error) {
         if (!cancelled) console.error("Failed to load content:", error);
       }
@@ -107,6 +153,56 @@ export default function Home() {
     void load();
     return () => {
       cancelled = true;
+    };
+  }, [access]);
+
+  useEffect(() => {
+    if (!access) return;
+    const channel = supabase
+      .channel("our-soundtrack-together")
+      .on("broadcast", { event: "song-picked" }, ({ payload }) => {
+        if (typeof payload?.songId !== "string") return;
+        setSelectedSongId(payload.songId);
+        setSongPickedBy(payload.pickedBy === "Tara" || payload.pickedBy === "Ahmad" ? payload.pickedBy : null);
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "songs" }, (event) => {
+        if (event.eventType === "INSERT") {
+          const added = event.new as Song;
+          setSongs((current) => current.some((song) => song.id === added.id) ? current : [added, ...current]);
+        }
+        if (event.eventType === "DELETE") {
+          const removedId = (event.old as { id?: string }).id;
+          if (removedId) {
+            setSongs((current) => current.filter((song) => song.id !== removedId));
+            setSelectedSongId((current) => current === removedId ? null : current);
+            setSongPickedBy(null);
+          }
+        }
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "song_ratings" }, (event) => {
+        if (event.eventType === "INSERT" || event.eventType === "UPDATE") {
+          const changed = event.new as SongRating;
+          setSongRatings((current) => [
+            ...current.filter((rating) => !(rating.song_id === changed.song_id && rating.user_name === changed.user_name)),
+            changed,
+          ]);
+        }
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "song_comments" }, (event) => {
+        if (event.eventType === "INSERT") {
+          const added = event.new as SongComment;
+          setSongComments((current) => current.some((comment) => comment.id === added.id) ? current : [added, ...current]);
+        }
+        if (event.eventType === "DELETE") {
+          const removedId = (event.old as { id?: string }).id;
+          if (removedId) setSongComments((current) => current.filter((comment) => comment.id !== removedId));
+        }
+      })
+      .subscribe();
+    songChannel.current = channel;
+    return () => {
+      songChannel.current = null;
+      void supabase.removeChannel(channel);
     };
   }, [access]);
 
@@ -201,6 +297,139 @@ export default function Home() {
     await fetchData();
   };
 
+  const addSong = async () => {
+    if (!songTitle.trim() || !songSpotifyUrl.trim()) {
+      alert("Add the song title and its Spotify link first.");
+      return;
+    }
+    let songUrl: URL;
+    try {
+      songUrl = new URL(songSpotifyUrl.trim());
+    } catch {
+      alert(`Please paste a valid ${songProvider === "spotify" ? "Spotify track" : "YouTube video"} link.`);
+      return;
+    }
+    let spotifyId: string | null = null;
+    let youtubeId: string | null = null;
+    if (songProvider === "spotify") {
+      const trackMatch = songUrl.hostname === "open.spotify.com"
+        ? songUrl.pathname.match(/^\/track\/([a-zA-Z0-9]+)\/?$/)
+        : null;
+      if (!trackMatch) {
+        alert("Please use a Spotify song link that looks like open.spotify.com/track/…");
+        return;
+      }
+      spotifyId = trackMatch[1];
+    } else {
+      const host = songUrl.hostname.toLowerCase().replace(/^www\./, "");
+      const isYoutubeHost = ["youtube.com", "m.youtube.com", "music.youtube.com", "youtu.be"].includes(host);
+      const pathId = songUrl.pathname.match(/^\/(?:embed|shorts|live)\/([^/?]+)/)?.[1];
+      const candidateId = host === "youtu.be"
+        ? songUrl.pathname.split("/").filter(Boolean)[0]
+        : songUrl.searchParams.get("v") || pathId;
+      if (!isYoutubeHost || !candidateId || !/^[a-zA-Z0-9_-]{11}$/.test(candidateId)) {
+        alert("Please use a YouTube video link, such as youtube.com/watch?v=… or youtu.be/…");
+        return;
+      }
+      youtubeId = candidateId;
+    }
+    if (songSetupNeeded || youtubeSetupNeeded) {
+      alert("Run the songs database migration shown on this page before adding tracks.");
+      return;
+    }
+    setSongLoading(true);
+    const { data, error } = await supabase
+      .from("songs")
+      .insert({
+        title: songTitle.trim(),
+        provider: songProvider,
+        spotify_url: spotifyId ? `https://open.spotify.com/track/${spotifyId}` : null,
+        spotify_id: spotifyId,
+        youtube_url: youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : null,
+        youtube_id: youtubeId,
+        dedication: songDedication.trim() || null,
+        created_by: currentUser,
+      })
+      .select()
+      .single();
+    if (error) {
+      if (error.message.toLowerCase().includes("song") || error.message.toLowerCase().includes("schema cache")) {
+        setSongSetupNeeded(true);
+      }
+      alert(error.message.includes("songs")
+        ? "The shared songs table is not set up yet. Run the migration in supabase/migrations/20261031000000_create_songs.sql in your Supabase SQL Editor, then try again."
+        : error.message);
+      setSongLoading(false);
+      return;
+    }
+    setSongTitle("");
+    setSongSpotifyUrl("");
+    setSongDedication("");
+    setSongProvider("spotify");
+    if (data?.id) chooseSong(data.id);
+    await fetchData();
+    setSongLoading(false);
+  };
+
+  const chooseSong = (id: string) => {
+    setSelectedSongId(id);
+    setSongPickedBy(currentUser);
+    void songChannel.current?.send({
+      type: "broadcast",
+      event: "song-picked",
+      payload: { songId: id, pickedBy: currentUser },
+    });
+  };
+
+  const rateSelectedSong = async (rating: number) => {
+    if (!selectedSongId || !currentUser) return;
+    setFeedbackSaving(true);
+    const { data, error } = await supabase
+      .from("song_ratings")
+      .upsert({
+        song_id: selectedSongId,
+        user_name: currentUser,
+        rating,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "song_id,user_name" })
+      .select()
+      .single();
+    if (error) {
+      if (error.message.toLowerCase().includes("song_ratings") || error.message.toLowerCase().includes("schema cache")) {
+        setFeedbackSetupNeeded(true);
+      }
+      alert("Could not save your rating. Run the song feedback migration in Supabase, then refresh.");
+      setFeedbackSaving(false);
+      return;
+    }
+    setSongRatings((current) => [
+      ...current.filter((item) => !(item.song_id === data.song_id && item.user_name === data.user_name)),
+      data,
+    ]);
+    setFeedbackSaving(false);
+  };
+
+  const addSongComment = async () => {
+    if (!selectedSongId || !currentUser || !commentDraft.trim()) return;
+    setFeedbackSaving(true);
+    const { data, error } = await supabase
+      .from("song_comments")
+      .insert({ song_id: selectedSongId, content: commentDraft.trim(), created_by: currentUser })
+      .select()
+      .single();
+    if (error) {
+      if (error.message.toLowerCase().includes("song_comments") || error.message.toLowerCase().includes("schema cache")) {
+        setFeedbackSetupNeeded(true);
+      }
+      alert("Could not save your comment. Run the song feedback migration in Supabase, then refresh.");
+      setFeedbackSaving(false);
+      return;
+    }
+    setSongComments((current) => current.some((item) => item.id === data.id) ? current : [data, ...current]);
+    setCommentDraft("");
+    setFeedbackSaving(false);
+  };
+
   const deleteMemory = async (id: string) => {
     await supabase.from("memories").delete().eq("id", id);
     await fetchData();
@@ -213,6 +442,14 @@ export default function Home() {
     await supabase.from("plans").delete().eq("id", id);
     await fetchData();
   };
+  const deleteSong = async (id: string) => {
+    await supabase.from("songs").delete().eq("id", id);
+    if (selectedSongId === id) {
+      setSelectedSongId(null);
+      setSongPickedBy(null);
+    }
+    await fetchData();
+  };
 
   if (!mounted) return <div className="splash" />;
   if (!access) return <LockScreen onUnlock={handleUnlock} />;
@@ -221,6 +458,7 @@ export default function Home() {
     { id: "memories", icon: <IconMemories />, label: "Memories" },
     { id: "notes", icon: <IconNotes />, label: "Notes" },
     { id: "plans", icon: <IconPlans />, label: "Plans" },
+    { id: "music", icon: <IconMusic />, label: "Our Soundtrack" },
     { id: "wedding", icon: <IconWedding />, label: "Our Wedding" },
   ];
   return (
@@ -325,6 +563,36 @@ export default function Home() {
             setPlanDate={setPlanDate}
             addPlan={addPlan}
             deletePlan={deletePlan}
+          />
+        )}
+        {activeTab === "music" && (
+          <MusicPage
+            songs={songs}
+            currentUser={currentUser}
+            title={songTitle}
+            setTitle={setSongTitle}
+            spotifyUrl={songSpotifyUrl}
+            setSpotifyUrl={setSongSpotifyUrl}
+            provider={songProvider}
+            setProvider={setSongProvider}
+            dedication={songDedication}
+            setDedication={setSongDedication}
+            loading={songLoading}
+            songSetupNeeded={songSetupNeeded}
+            youtubeSetupNeeded={youtubeSetupNeeded}
+            feedbackSetupNeeded={feedbackSetupNeeded}
+            ratings={songRatings}
+            comments={songComments}
+            commentDraft={commentDraft}
+            setCommentDraft={setCommentDraft}
+            feedbackSaving={feedbackSaving}
+            rateSelectedSong={rateSelectedSong}
+            addSongComment={addSongComment}
+            addSong={addSong}
+            deleteSong={deleteSong}
+            selectedSongId={selectedSongId}
+            songPickedBy={songPickedBy}
+            chooseSong={chooseSong}
           />
         )}
         {activeTab === "wedding" && <WeddingPage />}

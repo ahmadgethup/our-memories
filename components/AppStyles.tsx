@@ -1228,6 +1228,123 @@ export default function AppStyles() {
         animation: none !important;
         transform: none !important;
       }
+
+      /* ── OUR SOUNDTRACK ── */
+      .soundtrack-page { display: flex; flex-direction: column; gap: 1.5rem; }
+      .soundtrack-hero {
+        min-height: 225px; position: relative; overflow: hidden; display: flex;
+        align-items: center; justify-content: space-between; padding: 2.4rem 3rem;
+        border-radius: 30px; border: 1px solid rgba(255, 190, 166, .16);
+        background: radial-gradient(ellipse at 76% 45%, rgba(228, 116, 113, .22), transparent 38%),
+          linear-gradient(118deg, rgba(57, 19, 34, .96), rgba(32, 13, 29, .94) 55%, rgba(72, 31, 39, .96));
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 24px 70px rgba(0,0,0,.19);
+      }
+      .soundtrack-hero-copy { position: relative; z-index: 2; max-width: 500px; }
+      .soundtrack-kicker { display: block; color: rgba(255, 190, 166, .7); font-size: .64rem; letter-spacing: .2em; }
+      .soundtrack-hero h2 { color: #fff3ea; font: 300 clamp(2.3rem, 5vw, 3.5rem)/1.05 "Cormorant Garamond", serif; margin: .65rem 0 .55rem; }
+      .soundtrack-hero-copy p { color: rgba(255, 226, 214, .68); font-size: .88rem; }
+      .soundtrack-hero-note { position: absolute; bottom: 1.25rem; left: 3rem; color: rgba(255, 202, 182, .54); font: italic 1rem "Cormorant Garamond", serif; letter-spacing: .04em; }
+      .soundtrack-hero-note span { color: #ff8e9e; }
+      .soundtrack-disc { width: 162px; height: 162px; flex: 0 0 auto; position: relative; z-index: 2; margin-right: 2.6rem; border-radius: 50%; display: grid; place-items: center; background: repeating-radial-gradient(circle, #311323 0 8px, #492037 9px 10px, #2d1121 11px 18px); box-shadow: 0 0 0 8px rgba(255,255,255,.025), 0 22px 48px rgba(0,0,0,.45); animation: soundtrackSpin 18s linear infinite; }
+      .soundtrack-disc::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(135deg, rgba(255,255,255,.13), transparent 44%, rgba(255,160,180,.1)); }
+      .soundtrack-disc-label { width: 57px; height: 57px; display: grid; place-items: center; color: #fff1df; background: radial-gradient(circle at 35% 30%, #bd7381, #6e344c 70%); border: 4px solid #33182a; border-radius: 50%; }
+      .soundtrack-disc-groove { position: absolute; inset: 17px; border: 1px solid rgba(255,211,195,.16); border-radius: 50%; }
+      .soundtrack-orbit { position: absolute; border: 1px solid rgba(255,197,173,.1); border-radius: 50%; pointer-events: none; }
+      .soundtrack-orbit-one { width: 300px; height: 300px; right: -40px; top: -90px; }
+      .soundtrack-orbit-two { width: 230px; height: 230px; right: -7px; top: -55px; }
+      @keyframes soundtrackSpin { to { transform: rotate(360deg); } }
+      .soundtrack-layout { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(300px, .88fr); gap: 1.25rem; align-items: start; }
+      .soundtrack-player-card, .soundtrack-add-card, .soundtrack-collection { border: 1px solid rgba(255, 174, 181, .12); border-radius: 26px; background: linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.018)); box-shadow: 0 18px 48px rgba(0,0,0,.18); }
+      .soundtrack-player-card, .soundtrack-add-card { padding: 1.55rem; }
+      .soundtrack-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+      .soundtrack-section-heading h3 { color: #fff1e9; font: 400 1.6rem/1.15 "Cormorant Garamond", serif; margin-top: .35rem; }
+      .soundtrack-section-heading h3 span { font: 400 .9rem "DM Sans", sans-serif; color: rgba(255,195,185,.5); }
+      .soundtrack-live-dot { width: 9px; height: 9px; flex: 0 0 auto; border-radius: 50%; background: #f68da1; box-shadow: 0 0 13px rgba(246,141,161,.8); animation: soundtrackPulse 2s ease-in-out infinite; }
+      @keyframes soundtrackPulse { 50% { opacity: .45; box-shadow: 0 0 4px rgba(246,141,161,.5); } }
+      .soundtrack-now-title { color: #ffe9de; font: italic 1.35rem "Cormorant Garamond", serif; margin: .1rem 0 .2rem; }
+      .soundtrack-picked-by { color: rgba(255,202,195,.58); font-size: .72rem; margin-bottom: 1rem; }
+      .soundtrack-spotify-player { display: block; border: 0; border-radius: 13px; background: rgba(0,0,0,.15); }
+      .soundtrack-together-hint { margin-top: .8rem; color: rgba(255,216,206,.47); font-size: .7rem; line-height: 1.6; }
+      .soundtrack-empty-player { min-height: 204px; border: 1px dashed rgba(255,186,184,.16); border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1.4rem; }
+      .soundtrack-empty-note { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; margin-bottom: .8rem; color: #ffb0b8; background: rgba(255,150,169,.1); font-size: 1.5rem; }
+      .soundtrack-empty-player h4 { color: #ffe9e0; font: 400 1.25rem "Cormorant Garamond", serif; margin-bottom: .35rem; }
+      .soundtrack-empty-player p { color: rgba(255,216,206,.5); font-size: .75rem; }
+      .soundtrack-add-heart { color: #ff9da9; font: 2rem "Cormorant Garamond", serif; }
+      .soundtrack-setup-notice { display: flex; flex-direction: column; gap: .35rem; padding: 1rem 1.2rem; border: 1px solid rgba(255,192,135,.22); border-radius: 16px; background: rgba(120,70,35,.13); color: rgba(255,224,195,.72); font-size: .78rem; line-height: 1.6; }
+      .soundtrack-setup-notice strong { color: #ffe5c7; font-weight: 500; }
+      .soundtrack-setup-notice code { color: #ffd8b1; font-size: .72rem; overflow-wrap: anywhere; }
+      .soundtrack-label { display: block; color: rgba(255,218,210,.67); font-size: .72rem; margin: .8rem 0 .42rem; }
+      .soundtrack-provider-switch { display: flex; gap: .35rem; padding: .3rem; margin-bottom: .25rem; border: 1px solid rgba(255,174,181,.12); border-radius: 14px; background: rgba(0,0,0,.12); }
+      .soundtrack-provider-switch button { flex: 1; padding: .65rem .8rem; border: 1px solid transparent; border-radius: 10px; background: transparent; color: rgba(255,218,210,.52); font: 400 .78rem "DM Sans", sans-serif; cursor: pointer; transition: all .2s; }
+      .soundtrack-provider-switch button:hover { color: #fff; background: rgba(255,255,255,.04); }
+      .soundtrack-provider-switch button.soundtrack-provider-active { color: #fff1e9; border-color: rgba(255,174,181,.16); background: rgba(215,104,131,.16); box-shadow: inset 0 1px rgba(255,255,255,.05); }
+      .soundtrack-provider-pill { flex: 0 0 auto; padding: .28rem .48rem; border: 1px solid rgba(77,202,147,.16); border-radius: 999px; color: rgba(142,226,189,.75); background: rgba(40,125,90,.08); font-size: .59rem; letter-spacing: .03em; }
+      .soundtrack-provider-youtube { color: rgba(255,151,157,.8); border-color: rgba(255,123,133,.17); background: rgba(160,55,65,.1); }
+      .soundtrack-add-card .field { margin-bottom: .25rem; }
+      .soundtrack-dedication { min-height: 76px; }
+      .soundtrack-add-card .submit-btn { margin-top: .75rem; background: linear-gradient(135deg, #8f365b, #d36378); box-shadow: 0 8px 28px rgba(152,53,87,.26); }
+      .soundtrack-added-as { margin-top: .7rem; text-align: center; color: rgba(255,208,201,.4); font-size: .65rem; }
+      .soundtrack-collection { padding: 1.55rem; }
+      .soundtrack-feedback-card { padding: 1.6rem; border: 1px solid rgba(255,174,181,.14); border-radius: 26px; background: radial-gradient(ellipse at 100% 0%, rgba(219,114,143,.08), transparent 42%), linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.018)); box-shadow: 0 18px 48px rgba(0,0,0,.16); }
+      .soundtrack-combined-rating { display: flex; flex-direction: column; align-items: flex-end; gap: .2rem; }
+      .soundtrack-combined-rating > span { color: rgba(255,196,181,.48); font-size: .58rem; letter-spacing: .14em; }
+      .soundtrack-combined-rating strong { color: #ffd395; font-size: 1rem; }
+      .soundtrack-combined-rating small { color: rgba(255,220,197,.45); font-size: .7rem; font-weight: 400; }
+      .soundtrack-rating-pair { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .8rem; }
+      .soundtrack-person-rating { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: .4rem .8rem; padding: .85rem 1rem; border: 1px solid rgba(255,174,181,.1); border-radius: 16px; background: rgba(0,0,0,.11); }
+      .soundtrack-person-rating > span:first-child { color: rgba(255,228,218,.75); font-size: .78rem; }
+      .soundtrack-rating-stars { display: flex; gap: .12rem; color: rgba(255,212,169,.18); font-size: .86rem; }
+      .soundtrack-rating-stars .soundtrack-star-filled { color: #ffd18d; }
+      .soundtrack-person-rating small { grid-column: 1 / -1; color: rgba(255,209,195,.39); font-size: .65rem; }
+      .soundtrack-your-rating { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem .2rem .9rem; }
+      .soundtrack-your-rating > span { color: rgba(255,224,214,.65); font-size: .76rem; }
+      .soundtrack-rating-picker { display: flex; align-items: center; gap: .25rem; }
+      .soundtrack-rating-picker button { padding: .1rem .22rem; border: 0; background: transparent; color: rgba(255,212,169,.24); font-size: 1.55rem; line-height: 1; cursor: pointer; transition: color .18s, transform .18s; }
+      .soundtrack-rating-picker button:hover:not(:disabled) { color: #ffe0a5; transform: scale(1.15); }
+      .soundtrack-rating-picker button.soundtrack-star-filled { color: #ffd18d; filter: drop-shadow(0 0 5px rgba(255,198,126,.24)); }
+      .soundtrack-rating-picker button:disabled { cursor: default; opacity: .45; }
+      .soundtrack-comments-area { padding-top: 1rem; border-top: 1px solid rgba(255,174,181,.09); }
+      .soundtrack-comment-compose { display: grid; grid-template-columns: 1fr 190px; align-items: stretch; gap: .75rem; }
+      .soundtrack-comment-compose .field-ta { min-height: 74px; margin: 0; }
+      .soundtrack-comment-compose .submit-btn { align-self: stretch; padding: .7rem; font-size: .78rem; }
+      .soundtrack-comment-list { display: flex; flex-direction: column; gap: .55rem; margin-top: .9rem; }
+      .soundtrack-comment { padding: .8rem 1rem; border-left: 2px solid rgba(230,132,151,.35); border-radius: 0 14px 14px 0; background: rgba(255,255,255,.025); }
+      .soundtrack-comment-meta { display: flex; align-items: center; justify-content: space-between; gap: .8rem; margin-bottom: .3rem; }
+      .soundtrack-comment-meta strong { color: #ffc8c4; font-size: .7rem; font-weight: 500; }
+      .soundtrack-comment-meta time { color: rgba(255,204,196,.35); font-size: .61rem; }
+      .soundtrack-comment p { color: rgba(255,232,221,.74); font: italic 1rem/1.45 "Cormorant Garamond", serif; overflow-wrap: anywhere; }
+      .soundtrack-no-comments { padding: .75rem 0; color: rgba(255,216,206,.44); font: italic .95rem "Cormorant Garamond", serif; }
+      .soundtrack-collection-heading { margin-bottom: .9rem; }
+      .soundtrack-collection-caption { color: rgba(255,208,201,.4); font: italic .9rem "Cormorant Garamond", serif; }
+      .soundtrack-song-list { display: flex; flex-direction: column; gap: .48rem; }
+      .soundtrack-song-row { display: flex; align-items: center; gap: .6rem; padding: .35rem .45rem; border: 1px solid transparent; border-radius: 16px; transition: background .2s, border-color .2s; }
+      .soundtrack-song-row:hover { background: rgba(255,255,255,.035); }
+      .soundtrack-song-selected { background: rgba(216,104,131,.075); border-color: rgba(255,170,185,.12); }
+      .soundtrack-song-main { min-width: 0; flex: 1; display: flex; align-items: flex-start; gap: .85rem; padding: .6rem .45rem; text-align: left; border: 0; background: none; cursor: pointer; color: inherit; }
+      .soundtrack-song-number { color: rgba(255,205,200,.34); font-size: .68rem; font-variant-numeric: tabular-nums; }
+      .soundtrack-song-play { width: 29px; height: 29px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; color: #ffc5ca; background: rgba(240,135,157,.1); font-size: .68rem; }
+      .soundtrack-song-selected .soundtrack-song-play { color: #fff; background: linear-gradient(135deg,#a94b6d,#dc758a); box-shadow: 0 0 14px rgba(220,117,138,.25); }
+      .soundtrack-song-text { min-width: 0; display: flex; flex: 1; flex-direction: column; gap: .22rem; }
+      .soundtrack-song-text strong { color: #ffede7; font-size: .82rem; font-weight: 500; line-height: 1.4; overflow-wrap: anywhere; }
+      .soundtrack-song-text > span { color: rgba(255,203,197,.56); font: italic .9rem/1.45 "Cormorant Garamond", serif; white-space: normal; overflow-wrap: anywhere; }
+      .soundtrack-song-by { color: rgba(255,201,194,.37); font-size: .65rem; white-space: nowrap; }
+      .soundtrack-delete { padding: .4rem .55rem; }
+      .soundtrack-empty-list { padding: 1.4rem; border-radius: 16px; color: rgba(255,216,206,.55); background: rgba(255,255,255,.025); font: italic 1rem/1.6 "Cormorant Garamond", serif; text-align: center; }
+      @media (max-width: 760px) {
+        .soundtrack-hero { min-height: 200px; padding: 2rem 1.35rem; }
+        .soundtrack-hero h2 { font-size: 2.4rem; }
+        .soundtrack-disc { width: 104px; height: 104px; margin-right: .15rem; }
+        .soundtrack-disc-label { width: 43px; height: 43px; }
+        .soundtrack-hero-note { left: 1.35rem; bottom: 1rem; }
+        .soundtrack-layout { grid-template-columns: 1fr; }
+        .soundtrack-player-card, .soundtrack-add-card, .soundtrack-collection { padding: 1.15rem; }
+        .soundtrack-feedback-card { padding: 1.15rem; }
+        .soundtrack-person-rating { padding: .7rem; }
+        .soundtrack-person-rating .soundtrack-rating-stars { font-size: .7rem; }
+        .soundtrack-comment-compose { grid-template-columns: 1fr; }
+        .soundtrack-song-by { display: none; }
+        .soundtrack-collection-caption { display: none; }
+      }
     `}</style>
   );
 }
